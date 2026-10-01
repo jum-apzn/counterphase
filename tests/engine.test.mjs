@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {copy,move,isWon,solve,validateLevel,key} from '../dist/engine.js';
+const levels=JSON.parse(await readFile(new URL('../dist/levels.json',import.meta.url),'utf8'));
+test('five unique, valid levels with exact executable solutions',()=>{assert.equal(levels.length,5);assert.equal(new Set(levels.map(l=>l.id)).size,5);levels.forEach(validateLevel);});
+for(const level of levels)test(`BFS solves ${level.id}: ${level.title}`,()=>{const solution=solve(level);assert.ok(solution);let state=copy(level.start);for(const d of solution)state=move(level,state,d).state;assert.ok(isWon(level,state));assert.equal(level.solution.length,solution.length,'authored solution is shortest');console.log(`Level ${level.id}: shortest ${solution.length}, ${solution.join(' ')}`);});
+test('signals independently collide with walls',()=>{const level={grid:['#####','#...#','#####']};const state={blue:[2,1],orange:[1,1]};assert.deepEqual(move(level,state,'R'),{state:{blue:[3,1],orange:[1,1]},changed:true});assert.deepEqual(state,{blue:[2,1],orange:[1,1]});});
+test('signals can overlap, cross, and move away from their own goals',()=>{const level={grid:['######','#....#','######'],goals:{blue:[2,1],orange:[3,1]}};assert.deepEqual(move(level,{blue:[1,1],orange:[3,1]},'R').state,{blue:[2,1],orange:[2,1]});assert.deepEqual(move(level,{blue:[2,1],orange:[3,1]},'R').state,{blue:[3,1],orange:[2,1]});});
+test('both blocked is a no-op',()=>assert.equal(move({grid:['#####','#...#','#####']},{blue:[1,1],orange:[3,1]},'L').changed,false));
+test('win requires both matching signals at the same time',()=>{const l=levels[0];assert.equal(isWon(l,{blue:l.goals.blue,orange:l.start.orange}),false);assert.equal(isWon(l,l.goals),true);assert.equal(isWon(l,{blue:l.goals.orange,orange:l.goals.blue}),false);});
+test('all reachable positions are floor, with bounded joint state count',()=>{for(const l of levels){const queue=[copy(l.start)],seen=new Set([key(l.start)]);for(let i=0;i<queue.length;i++)for(const d of ['U','D','L','R']){const {state}=move(l,queue[i],d);for(const pos of [state.blue,state.orange])assert.equal(l.grid[pos[1]][pos[0]],'.');const k=key(state);if(!seen.has(k)){seen.add(k);queue.push(state);}}assert.ok(seen.size<=2401);}});
+test('malformed or unsolved levels are rejected',()=>{assert.throws(()=>validateLevel({...levels[0],solution:['U']}));assert.throws(()=>validateLevel({...levels[0],grid:['...','..']}));assert.throws(()=>validateLevel({...levels[0],start:{blue:[0,0],orange:[3,2]}}));});

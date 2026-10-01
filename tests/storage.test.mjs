@@ -1,0 +1,9 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
+import {fingerprint} from '../dist/engine.js';import {emptyProgress,readProgress,recordWin,writeProgress,STORAGE_KEY} from '../dist/storage.js';
+const levels=JSON.parse(await readFile(new URL('../dist/levels.json',import.meta.url),'utf8'));
+const fake=value=>({getItem:()=>value,setItem:(k,v)=>{assert.equal(k,STORAGE_KEY);value=v;}});
+test('empty, malformed and future versions fail safely',()=>{for(const value of [null,'{','null','[]','{"version":2,"records":{}}'])assert.deepEqual(readProgress(fake(value),levels),emptyProgress());});
+test('storage access denied does not break play',()=>{const storage={getItem:()=>{throw Error('denied');},setItem:()=>{throw Error('denied');}};assert.deepEqual(readProgress(storage,levels),emptyProgress());assert.equal(writeProgress(storage,emptyProgress()),false);});
+test('valid record round trip and best only improves',()=>{const progress=emptyProgress();recordWin(progress,levels[0],5);recordWin(progress,levels[0],8);assert.equal(progress.records['01'].best,5);recordWin(progress,levels[0],2);const storage=fake(null);assert.equal(writeProgress(storage,progress),true);assert.deepEqual(readProgress(storage,levels),progress);});
+test('changed puzzle discards incompatible record',()=>{const progress=emptyProgress();recordWin(progress,levels[0],2);const changed=[{...levels[0],goals:{blue:[3,1],orange:[1,3]}},...levels.slice(1)];assert.deepEqual(readProgress(fake(JSON.stringify(progress)),changed).records,{});});
+test('invalid records and unknown last level are removed',()=>{const p={version:1,lastLevel:'bogus',records:{'01':{best:-1,fingerprint:fingerprint(levels[0])}}};assert.deepEqual(readProgress(fake(JSON.stringify(p)),levels),emptyProgress());});

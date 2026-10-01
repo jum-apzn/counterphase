@@ -1,6 +1,6 @@
 # 역위상 / Counterphase
 
-> Development scaffold: the game implementation is being added. This initial README defines the gameplay and level-data contract.
+> Development checkpoint: the complete five-level game is runnable locally. Syntax checks and all 18 automated tests pass. Visual and interactive testing in real desktop and mobile browsers is still in progress.
 
 A single-player browser puzzle. One input moves two signals: blue follows your direction, orange moves in the opposite direction. A blocked signal stays still independently. Use walls to align both signals with their own receivers at the same time.
 
