@@ -26,7 +26,7 @@ function playSound(kind='move'){
   }catch{/* Audio is a progressive enhancement. */}
 }
 function drawBoard(){
-  const l=level();board.replaceChildren();board.style.setProperty('--cols',l.grid[0].length);board.style.setProperty('--rows',l.grid.length);board.style.aspectRatio=`${l.grid[0].length} / ${l.grid.length}`;
+  const l=level();board.replaceChildren();board.setAttribute('aria-busy','false');board.style.setProperty('--cols',l.grid[0].length);board.style.setProperty('--rows',l.grid.length);board.style.aspectRatio=`${l.grid[0].length} / ${l.grid.length}`;
   l.grid.forEach((row,y)=>[...row].forEach((type,x)=>{
     const cell=document.createElement('div');cell.className=`cell${type==='#'?' wall':''}`;cell.setAttribute('aria-hidden','true');
     for(const signal of ['blue','orange'])if(same([x,y],l.goals[signal])){const goal=document.createElement('span');goal.className=`goal ${signal}`;goal.dataset.goal=signal;cell.append(goal);}

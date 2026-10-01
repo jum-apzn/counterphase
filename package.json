@@ -1,6 +1,15 @@
 {
-  "name": "counterphase", "version": "1.0.0", "private": true,
+  "name": "counterphase",
+  "version": "1.0.0",
+  "private": true,
   "description": "A single-player puzzle about two signals moving in opposite directions.",
-  "type": "module", "scripts": {"dev": "node scripts/serve.mjs", "test": "node --test tests/*.test.mjs", "check": "node --check dist/app.js && node --check dist/engine.js && node --check dist/storage.js && npm test"},
-  "engines": {"node": ">=20"}
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node scripts/check-assets.mjs && node --check dist/app.js && node --check dist/engine.js && node --check dist/storage.js && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }

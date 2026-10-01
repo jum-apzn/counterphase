@@ -59,4 +59,5 @@ test('app event flow: no-op, repeats, overlap, win, undo, restart, all levels, h
   assert.equal(h.ids.get('result-title').textContent,'모든 신호가 연결됐어요');
   const saved=JSON.parse(h.win.localStorage.getItem('counterphase.progress.v1'));assert.equal(Object.keys(saved.records).length,5);assert.equal(saved.lastLevel,'05');
   h.ids.get('level-menu').click();h.ids.get('reset-button').click();h.ids.get('cancel-reset').click();assert.equal(h.ids.get('reset-confirm').hidden,true);assert.equal(Object.keys(JSON.parse(h.win.localStorage.getItem('counterphase.progress.v1')).records).length,5,'cancel preserves records');
+  h.ids.get('reset-button').click();h.ids.get('confirm-reset').click();assert.equal(Object.keys(JSON.parse(h.win.localStorage.getItem('counterphase.progress.v1')).records).length,0,'confirmed reset clears test records');assert.equal(h.moves(),0);assert.equal(h.ids.get('level-number').textContent,'01');
 });
